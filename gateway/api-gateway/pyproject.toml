@@ -1,0 +1,9 @@
+[project]
+name = "api-gateway"
+version = "1.0.0"
+description = "API Gateway for the platform"
+requires-python = ">=3.12"
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
