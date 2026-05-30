@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  :root {
+    --color-bg: oklch(0.985 0.005 270);
+    --color-surface: oklch(1 0 0);
+    --color-border: oklch(0.92 0.012 270);
+    --color-text: oklch(0.25 0.02 270);
+    --color-text-muted: oklch(0.52 0.03 270);
+    --color-primary: oklch(0.42 0.2 270);
+    --color-primary-hover: oklch(0.35 0.2 270);
+    --color-sidebar-bg: oklch(0.97 0.005 270);
+    --color-accent: oklch(0.55 0.22 270);
+  }
+
+  .dark {
+    --color-bg: oklch(0.14 0.012 270);
+    --color-surface: oklch(0.19 0.015 270);
+    --color-border: oklch(0.25 0.02 270);
+    --color-text: oklch(0.88 0.005 270);
+    --color-text-muted: oklch(0.54 0.02 270);
+    --color-primary: oklch(0.62 0.2 270);
+    --color-primary-hover: oklch(0.72 0.18 270);
+    --color-sidebar-bg: oklch(0.12 0.012 270);
+    --color-accent: oklch(0.65 0.22 270);
+  }
+}
+
+@theme inline {
+  --color-bg: var(--color-bg);
+  --color-surface: var(--color-surface);
+  --color-border: var(--color-border);
+  --color-text: var(--color-text);
+  --color-text-muted: var(--color-text-muted);
+  --color-primary: var(--color-primary);
+  --color-primary-hover: var(--color-primary-hover);
+  --color-sidebar-bg: var(--color-sidebar-bg);
+  --color-accent: var(--color-accent);
+}
