@@ -2,17 +2,6 @@ import type { MicroFrontend } from './types'
 
 export const microFrontends: MicroFrontend[] = [
   {
-    name: 'auth',
-    displayName: 'Auth',
-    remoteEntry: 'http://localhost:3001/assets/remoteEntry.js',
-    moduleName: 'auth/App',
-    icon: 'shield',
-    routes: [
-      { path: '/login', label: 'Login' },
-      { path: '/register', label: 'Register' },
-    ],
-  },
-  {
     name: 'dashboard',
     displayName: 'Dashboard',
     remoteEntry: 'http://localhost:3002/assets/remoteEntry.js',

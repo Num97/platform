@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { getMFsForSidebar } from '../microfrontends/registry'
+import { useAuth } from '../context/useAuth'
 
 interface SidebarProps {
   open: boolean
@@ -13,6 +14,17 @@ function HomeIcon() {
     <svg className="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
       <polyline points="9,22 9,12 15,12 15,22" />
+    </svg>
+  )
+}
+
+function UsersIcon() {
+  return (
+    <svg className="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M23 21v-2a4 4 0 00-3-3.87" />
+      <path d="M16 3.13a4 4 0 010 7.75" />
     </svg>
   )
 }
@@ -46,6 +58,7 @@ function ModuleIcon({ icon }: { icon: string }) {
 
 export function Sidebar({ open, collapsed, onClose, onToggleCollapse }: SidebarProps) {
   const navItems = getMFsForSidebar()
+  const { user } = useAuth()
 
   return (
     <>
@@ -121,6 +134,27 @@ export function Sidebar({ open, collapsed, onClose, onToggleCollapse }: SidebarP
                 </span>
               </NavLink>
             </li>
+
+            {user?.role === 'admin' && (
+            <li>
+              <NavLink
+                to="/users"
+                onClick={onClose}
+                className={({ isActive }) =>
+                  `flex items-center rounded-lg py-2 text-sm transition-colors duration-200 ${collapsed ? 'lg:justify-center lg:gap-0 lg:px-0' : 'gap-3 px-3'} ${
+                    isActive
+                      ? 'bg-primary/10 text-primary font-medium'
+                      : 'text-text-muted hover:bg-primary/5 hover:text-text'
+                  }`
+                }
+              >
+                <UsersIcon />
+                <span className={`transition-opacity duration-150 ${collapsed ? 'lg:opacity-0 lg:w-0 lg:overflow-hidden' : 'lg:opacity-100'}`}>
+                  Пользователи
+                </span>
+              </NavLink>
+            </li>
+            )}
 
             <li className={`pt-4 pb-1 ${collapsed ? 'lg:hidden' : ''}`}>
               <span className="whitespace-nowrap px-3 text-xs font-semibold uppercase tracking-wider text-text-muted/60">

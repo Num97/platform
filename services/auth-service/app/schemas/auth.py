@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr, Field, validator
 from typing import Optional
 from datetime import datetime
+from ..models.user import UserRole
 
 
 class TokenResponse(BaseModel):
@@ -23,9 +24,9 @@ class TokenResponse(BaseModel):
 
 class LoginRequest(BaseModel):
     """Запрос на вход"""
-    username: str = Field(..., min_length=3, max_length=100, description="Username or email")
-    password: str = Field(..., min_length=8, max_length=128)
-    remember_me: bool = Field(False, description="Extend refresh token lifetime")
+    username: str = Field(..., min_length=4, max_length=100, description="Имя пользователя или email")
+    password: str = Field(..., min_length=4, max_length=128)
+    remember_me: bool = Field(False, description="Продлить время жизни refresh токена")
 
     class Config:
         json_schema_extra = {
@@ -40,33 +41,30 @@ class LoginRequest(BaseModel):
 class RegisterRequest(BaseModel):
     """Запрос на регистрацию"""
     email: EmailStr
-    username: str = Field(..., min_length=3, max_length=100, pattern=r"^[a-zA-Z0-9_-]+$")
-    password: str = Field(..., min_length=8, max_length=128)
+    username: str = Field(..., min_length=4, max_length=100)
+    password: str = Field(..., min_length=4, max_length=128)
     password_confirm: str
     full_name: Optional[str] = Field(None, max_length=255)
+    role: UserRole = Field(UserRole.USER, description="Роль пользователя")
 
     @validator('username')
-    def username_alphanumeric(cls, v):
+    def username_valid(cls, v):
+        if len(v) < 4:
+            raise ValueError('Имя пользователя должно быть не менее 4 символов')
         if not v.replace('-', '').replace('_', '').isalnum():
-            raise ValueError('Username must be alphanumeric')
+            raise ValueError('Имя пользователя должно содержать только буквы, цифры, - и _')
         return v.lower()
 
     @validator('password_confirm')
     def passwords_match(cls, v, values):
         if 'password' in values and v != values['password']:
-            raise ValueError('Passwords do not match')
+            raise ValueError('Пароли не совпадают')
         return v
 
     @validator('password')
-    def password_strength(cls, v):
-        if not any(c.isupper() for c in v):
-            raise ValueError('Password must contain at least one uppercase letter')
-        if not any(c.islower() for c in v):
-            raise ValueError('Password must contain at least one lowercase letter')
-        if not any(c.isdigit() for c in v):
-            raise ValueError('Password must contain at least one digit')
-        if not any(c in '!@#$%^&*()_+-=[]{}|;:,.<>?' for c in v):
-            raise ValueError('Password must contain at least one special character')
+    def password_latin(cls, v):
+        if not all(c.isascii() and (c.isalpha() or c.isdigit() or c in '!@#$%^&*()_+-=[]{}|;:,.<>?') for c in v):
+            raise ValueError('Пароль должен содержать только латиницу, цифры и спецсимволы')
         return v
 
     class Config:

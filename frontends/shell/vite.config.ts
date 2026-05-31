@@ -22,4 +22,7 @@ export default defineConfig({
     minify: false,
     cssCodeSplit: false,
   },
+  server: {
+    port: 3000,
+  },
 })

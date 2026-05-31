@@ -9,7 +9,7 @@ def verify_token(authorization: Optional[str] = Header(None)) -> Dict[str, Any]:
     if not authorization:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated",
+            detail="Не авторизован",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -17,7 +17,7 @@ def verify_token(authorization: Optional[str] = Header(None)) -> Dict[str, Any]:
     if scheme.lower() != "bearer" or not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication scheme",
+            detail="Неверная схема авторизации",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -31,12 +31,12 @@ def verify_token(authorization: Optional[str] = Header(None)) -> Dict[str, Any]:
         if payload.get("type") != "access":
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid token type",
+                detail="Неверный тип токена",
             )
         return payload
     except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
+            detail="Токен недействителен или истёк",
             headers={"WWW-Authenticate": "Bearer"},
         )

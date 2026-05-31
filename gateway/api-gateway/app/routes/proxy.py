@@ -9,7 +9,6 @@ from app.core.dependencies import verify_token
 router = APIRouter()
 
 OPEN_ROUTES = {
-    ("POST", "/api/v1/auth/register"),
     ("POST", "/api/v1/auth/login"),
     ("POST", "/api/v1/auth/refresh"),
     ("POST", "/api/v1/auth/logout"),

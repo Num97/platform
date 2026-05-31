@@ -31,7 +31,7 @@ async def get_current_user(
     if not authorization:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated",
+            detail="Не авторизован",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -41,7 +41,7 @@ async def get_current_user(
     if payload is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials",
+            detail="Недействительные учётные данные",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -49,14 +49,14 @@ async def get_current_user(
     if payload.get("type") != "access":
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token type"
+            detail="Неверный тип токена"
         )
 
     user_id = payload.get("sub")
     if user_id is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token payload"
+            detail="Недействительный токен"
         )
 
     # Получение пользователя
@@ -66,13 +66,13 @@ async def get_current_user(
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found"
+            detail="Пользователь не найден"
         )
 
     if not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Inactive user"
+            detail="Пользователь неактивен"
         )
 
     return user
@@ -85,7 +85,7 @@ async def get_current_active_user(
     if not current_user.is_active:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Inactive user"
+            detail="Пользователь неактивен"
         )
     return current_user
 
@@ -97,7 +97,7 @@ async def get_current_admin_user(
     if current_user.role != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not enough permissions"
+            detail="Недостаточно прав"
         )
     return current_user
 
@@ -109,6 +109,6 @@ async def get_current_manager_or_admin(
     if current_user.role not in ("admin", "manager"):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not enough permissions"
+            detail="Недостаточно прав"
         )
     return current_user

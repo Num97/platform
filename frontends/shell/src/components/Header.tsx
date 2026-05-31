@@ -1,4 +1,6 @@
+import { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { useAuth } from '../context/useAuth'
 import { useTheme } from '../context/useTheme'
 
 interface HeaderProps {
@@ -6,7 +8,20 @@ interface HeaderProps {
 }
 
 export function Header({ onMenuToggle }: HeaderProps) {
+  const { user, isAuthenticated, logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
+  const [profileOpen, setProfileOpen] = useState(false)
+  const profileRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between border-b border-border bg-surface/80 px-4 backdrop-blur-md lg:px-6">
@@ -39,30 +54,76 @@ export function Header({ onMenuToggle }: HeaderProps) {
 
       <div className="flex items-center gap-0.5">
         <div className="hidden items-center gap-0.5 lg:flex">
-          <Link
-            to="/dashboard"
-            className="rounded-lg px-3 py-1.5 text-sm text-text-muted transition-all duration-200 hover:bg-primary/8 hover:text-primary hover:scale-[1.03]"
-          >
-            Панель
-          </Link>
-          <Link
-            to="/login"
-            className="rounded-lg px-3 py-1.5 text-sm text-text-muted transition-all duration-200 hover:bg-primary/8 hover:text-primary hover:scale-[1.03]"
-          >
-            Вход
-          </Link>
+          {isAuthenticated && (
+            <>
+              <Link
+                to="/dashboard"
+                className="rounded-lg px-3 py-1.5 text-sm text-text-muted transition-all duration-200 hover:bg-primary/8 hover:text-primary hover:scale-[1.03]"
+              >
+                Панель
+              </Link>
+              {user?.role === 'admin' && (
+                <Link
+                  to="/users"
+                  className="rounded-lg px-3 py-1.5 text-sm text-text-muted transition-all duration-200 hover:bg-primary/8 hover:text-primary hover:scale-[1.03]"
+                >
+                  Пользователи
+                </Link>
+              )}
+            </>
+          )}
+          {!isAuthenticated && (
+            <Link
+              to="/login"
+              className="rounded-lg px-3 py-1.5 text-sm text-text-muted transition-all duration-200 hover:bg-primary/8 hover:text-primary hover:scale-[1.03]"
+            >
+              Вход
+            </Link>
+          )}
         </div>
 
-        <button
-          type="button"
-          className="inline-flex items-center justify-center rounded-lg p-2 text-text-muted transition-all duration-200 hover:scale-110 hover:bg-primary/10 hover:text-primary"
-          aria-label="Профиль"
-        >
-          <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="8" r="4" />
-            <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
-          </svg>
-        </button>
+        <div className="relative" ref={profileRef}>
+          <button
+            type="button"
+            onClick={() => setProfileOpen((v) => !v)}
+            className="inline-flex items-center justify-center rounded-lg p-2 text-text-muted transition-all duration-200 hover:scale-110 hover:bg-primary/10 hover:text-primary"
+            aria-label="Профиль"
+          >
+            <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+            </svg>
+          </button>
+
+          {profileOpen && (
+            <div className="absolute right-0 top-full mt-2 w-48 rounded-lg border border-border bg-surface p-1.5 shadow-lg">
+              {isAuthenticated && user ? (
+                <>
+                  <div className="border-b border-border px-3 py-2">
+                    <p className="text-sm font-medium text-text">{user.username}</p>
+                    <p className="text-xs text-text-muted">{user.email}</p>
+                    <p className="mt-0.5 text-xs text-text-muted/60 capitalize">{user.role}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setProfileOpen(false); logout() }}
+                    className="mt-1 w-full rounded-md px-3 py-2 text-left text-sm text-text-muted transition-colors hover:bg-bg hover:text-text"
+                  >
+                    Выйти
+                  </button>
+                </>
+              ) : (
+                <Link
+                  to="/login"
+                  onClick={() => setProfileOpen(false)}
+                  className="block w-full rounded-md px-3 py-2 text-left text-sm text-text-muted transition-colors hover:bg-bg hover:text-text"
+                >
+                  Войти
+                </Link>
+              )}
+            </div>
+          )}
+        </div>
 
         <button
           type="button"

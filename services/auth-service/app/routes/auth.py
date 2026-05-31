@@ -13,7 +13,7 @@ from app.schemas.auth import (
     PasswordResetRequest,
     PasswordResetConfirm,
 )
-from app.core.dependencies import get_current_active_user
+from app.core.dependencies import get_current_active_user, get_current_admin_user
 from app.models.user import UserStatus
 from app.models.user import User
 from typing import Dict, Any
@@ -24,20 +24,22 @@ router = APIRouter(tags=["authentication"])
 @router.post("/register", response_model=Dict[str, Any], status_code=status.HTTP_201_CREATED)
 async def register(
         register_data: RegisterRequest,
-        db: Session = Depends(get_db)
+        db: Session = Depends(get_db),
+        current_user: User = Depends(get_current_admin_user),
 ):
     """
-    Регистрация нового пользователя
+    Создание нового пользователя (только для администратора)
 
     - **email**: Email пользователя
     - **username**: Уникальное имя пользователя
     - **password**: Пароль (мин. 8 символов, заглавные, строчные, цифры, спецсимволы)
+    - **role**: Роль пользователя (по умолчанию user)
     """
     auth_service = AuthService(db)
     user = auth_service.register_user(register_data)
 
     return {
-        "message": "User registered successfully",
+        "message": "Пользователь успешно создан",
         "user_id": user.id,
         "email": user.email,
         "username": user.username,
@@ -64,14 +66,14 @@ async def login(
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username/email or password",
+            detail="Неверный логин или пароль",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
     if user.status == UserStatus.INACTIVE:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Account is inactive"
+            detail="Аккаунт неактивен"
         )
 
     # Создание токенов

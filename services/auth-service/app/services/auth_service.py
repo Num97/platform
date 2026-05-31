@@ -32,13 +32,13 @@ class AuthService:
         if self.get_user_by_email(register_data.email):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email already registered"
+                detail="Email уже зарегистрирован"
             )
 
         if self.get_user_by_username(register_data.username):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Username already taken"
+                detail="Имя пользователя уже занято"
             )
 
         # Создание пользователя
@@ -47,6 +47,7 @@ class AuthService:
             username=register_data.username,
             hashed_password=self.security.get_password_hash(register_data.password),
             full_name=register_data.full_name,
+            role=register_data.role,
         )
 
         self.db.add(user)
@@ -147,7 +148,7 @@ class AuthService:
         if not payload or payload.get("type") != "refresh":
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid refresh token"
+                detail="Недействительный refresh токен"
             )
 
         # Проверяем существование токена в БД
@@ -159,14 +160,14 @@ class AuthService:
         if not db_token:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Refresh token not found or revoked"
+                detail="Refresh токен не найден или отозван"
             )
 
         # Проверяем не истек ли токен
         if db_token.expires_at < datetime.utcnow():
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Refresh token expired"
+                detail="Срок действия refresh токена истёк"
             )
 
         # Получаем пользователя
@@ -174,7 +175,7 @@ class AuthService:
         if not user or not user.is_active:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="User not found or inactive"
+                detail="Пользователь не найден или неактивен"
             )
 
         # Отзываем старый refresh токен (ротация)
